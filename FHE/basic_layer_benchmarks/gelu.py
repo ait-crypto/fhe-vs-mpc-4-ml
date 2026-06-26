@@ -1,0 +1,137 @@
+
+import torch
+import subprocess
+import csv
+import numpy as np
+from torch import nn
+import brevitas.nn as qnn
+from brevitas.quant import Int8ActPerTensorFloat
+from concrete.ml.torch.compile import compile_brevitas_qat_model
+from time import perf_counter
+
+
+
+plain_times = []
+plain_times_std = []
+mean_error = []
+cipher_times = []
+cipher_times_std = []
+sample_sizes = []
+
+N_BITS = 8
+
+class MyGelu(nn.Module):
+    def __init__(self,qidentity_args={"bit_width": N_BITS, "act_quant": Int8ActPerTensorFloat}):
+        super(MyGelu, self).__init__()
+        self.ident = qnn.QuantIdentity( **qidentity_args)
+        self.gelu = nn.GELU()
+    def forward(self, x):
+        x = self.ident(x)
+        x = self.gelu(x)
+        return x
+
+
+
+def make_data(sample_size, vector_size):
+    data = []
+    for i in range(sample_size):
+        data.append(torch.randn((1,vector_size)))
+    
+    return data
+
+
+def test(vec_size, sample_size, mem_file):
+    model = MyGelu()
+    fhe_model = compile_brevitas_qat_model(model, torch.randn((1,vec_size)), rounding_threshold_bits=8, n_bits=8)
+    print("Compilation done")
+
+    proc = bench_power_measurement(mem_file)
+    inference(fhe_model, model, sample_size, vec_size)
+    proc.terminate()
+    proc.wait()
+
+
+def inference(fhe_model, model, sample_size, vec_size):
+    test_data = make_data(sample_size, vec_size)
+
+    ctimes= []
+    ptimes= []
+    errors = []
+
+    x = 0
+    for i in test_data:
+        begin = perf_counter()
+        res = fhe_model.forward(i.numpy(), fhe="execute")
+        end_plain = perf_counter()-begin
+
+        begin = perf_counter()
+        res_plain = model.forward(i)
+        end_enc = perf_counter()-begin
+        
+        if x > 3:
+            res_plain = res_plain.detach().numpy()
+            err = np.mean((res_plain - res) ** 2)
+            errors.append(err)
+            ptimes.append(end_enc)
+            ctimes.append(end_plain)
+        x += 1
+
+
+    avgC = np.average(ctimes)
+    std_devC = np.std(ctimes)
+    avgP = np.average(ptimes)
+    std_devP = np.std(ptimes)
+    
+    print(std_devC, ", ", avgC)
+    print(std_devP, ", ", avgP)
+    if (std_devC*10 > avgC): return inference(fhe_model, model, sample_size*2, vec_size)
+    else:
+        print("another one")
+        plain_times.append(avgP)
+        cipher_times.append(avgC)
+        plain_times_std.append(std_devP)
+        cipher_times_std.append(std_devC)
+        mean_error.append(np.average(errors))
+        sample_sizes.append(sample_size)
+
+
+def base_power_measurement():
+
+    cmd = ["sudo", "powerstat", "-R", "1", "60"]
+
+    print("Running base powerstat...")
+    with open("results/basic_layers/gelu/idle_powerstat_data.txt", "w") as f:
+        subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT)
+    print("Done. Output saved.")
+
+def bench_power_measurement(f):
+
+    cmd = ["sudo", "powerstat", "-R", "1", "3600"]
+
+    proc = subprocess.Popen(cmd, stdout=f, stderr=subprocess.STDOUT)
+
+    return proc
+
+if __name__ == "__main__":
+
+    vector_sizes = [8,16,32]
+    warmup = 3
+
+    base_power_measurement()
+    mem_file = open(f"results/basic_layers/gelu/powerstat_data.txt", "w")
+
+    for i in vector_sizes:
+        test(i,20+warmup, mem_file)
+        print(f"done with vector size {i}")
+    mem_file.close()
+
+    file = open("results/basic_layers/gelu/data.txt", "a", newline='')
+    writer = csv.writer(file)
+    writer.writerow(["vector size", "mean plain [s]", "std plain", "mean encryped [s]","std encrypted", "error", "sample size"])
+        
+    for i in range(len(vector_sizes)):
+        writer.writerow([vector_sizes[i], round(plain_times[i],5), round(plain_times_std[i],5), round(cipher_times[i],5), 
+                         round(cipher_times_std[i],5), round(mean_error[i],5), sample_sizes[i]-warmup])
+        file.flush()
+        
+    file.close()
