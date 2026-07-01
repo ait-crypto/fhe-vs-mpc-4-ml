@@ -1,22 +1,18 @@
 
-from time import perf_counter
 import csv
 import subprocess
-import gc
 import sys
 import time
-
 import numpy as np
-from sklearn.datasets import make_regression
+from time import perf_counter
+from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
-
-from concrete.ml.sklearn import LinearRegression
-
+from concrete.ml.sklearn import LogisticRegression
 
 
 plain_times = []
 plain_times_std = []
-mean_error = []
+error_amount = []
 cipher_times = []
 cipher_times_std = []
 sample_sizes = []
@@ -27,12 +23,12 @@ layer_amounts = []
 ############data stuff
 def generateDataset(sample_size, features):
 
-
-    X, y = make_regression(
+    X, y = make_classification(
         n_samples=int(sample_size/0.4),
         n_features=features,
-        n_informative=features,
+        n_informative=int(features*0.8),
     )
+
 
     rng = np.random.RandomState(2)
     X += 2 * rng.uniform(size=X.shape)
@@ -46,14 +42,15 @@ def generateDataset(sample_size, features):
 def test(features, sample_size, mem_file, bits):
 
     data, train_data, train_result = generateDataset(sample_size, features)
-    fhe_model = LinearRegression(n_bits=int(bits))
+    fhe_model = LogisticRegression(n_bits=int(bits))
     
     fhe_model.fit(train_data, train_result)
     fhe_model.compile(train_data)
 
+    
     ptimes = []
     ctimes = []
-    errors = []
+    errors = 0
     x = 0 
     proc = bench_power_measurement(mem_file)
     
@@ -68,14 +65,12 @@ def test(features, sample_size, mem_file, bits):
         
 
         if (x > 4):
-            err = abs(res_plain[0] - res[0])/abs(res_plain[0])
-            errors.append(err)
+            if res[0] != res_plain[0]: errors += 1
             ptimes.append(end_plain)
             ctimes.append(end_enc)
         x += 1
     
     proc.terminate()
-    #print("errors: ", np.mean(errors))
     
     avgC = np.mean(ctimes)
     std_devC = np.std(ctimes)
@@ -91,20 +86,21 @@ def test(features, sample_size, mem_file, bits):
         cipher_times.append(avgC)
         plain_times_std.append(std_devP)
         cipher_times_std.append(std_devC)
-        mean_error.append(np.mean(errors))
+        error_amount.append(errors)
         sample_sizes.append(sample_size)
 
 ####################################################################
 ############memory benches
-def plain_bench(sample_size, features, bits):
+def plain_bench(sample_size, features):
     data, train_data, train_result = generateDataset(sample_size, features)
 
-    model = LinearRegression(n_bits=bits)
+    model = LogisticRegression(n_bits=bits)
     model.fit(train_data,train_result)
     model.compile(train_data)
 
     for i in data:
         model.predict(i, fhe="disable")
+
 
 ####################################################################
 ############power measurements
@@ -113,7 +109,7 @@ def base_power_measurement(bits):
     cmd = ["sudo", "powerstat", "-R", "1", "60"]
 
     print("Running base powerstat...")
-    with open(f"results/linear_regression/{bits}bit/idle_powerstat.txt", "w") as f:
+    with open(f"results/logistic_classification/{bits}bit/idle_powerstat.txt", "w") as f:
         subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT)
     print("Done. Output saved.")
 
@@ -123,6 +119,8 @@ def bench_power_measurement(f):
     proc = subprocess.Popen(cmd, stdout=f, stderr=subprocess.STDOUT)
     return proc
 
+def wait():
+    time.sleep(5)
 
 ####################################################################
 ############main
@@ -134,32 +132,31 @@ if __name__ == "__main__":
     ############## power stuff
     base_power_measurement(bits)
 
-    mem_file_plain = open(f"results/linear_regression/{bits}bit/powerstat_bench_plain.txt", "w")
+    mem_file_plain = open(f"results/logistic_classification/{bits}bit/powerstat_bench_plain.txt", "w")
     proc = bench_power_measurement(mem_file_plain)  
-    plain_bench(2000000, 500, bits)
+    plain_bench(2000000, 500)
     print("done with plaintext powerstat benchmark")
 
     proc.terminate()
     proc.wait()
 
     ######################### time/accuracy bench
-    mem_file = open(f"results/linear_regression/normal/{bits}bit/powerstat_bench.txt", "w")
+    mem_file = open(f"results/logistic_classification/{bits}bit/powerstat_bench.txt", "w")
 
     for i in feature_size:
         test(i,3000+5, mem_file, bits)
         print(f"done with number of feature: {i}")
-    
     mem_file.close()
     print("done with time and accuracy benchmarks benchmarks")
 
-        
-    file = open(f'results/linear_regression/{bits}bit/data.csv','a', newline='')
+    
+    file = open(f'results/logistic_classification/{bits}bit/data.csv','a', newline='')
     writer = csv.writer(file)
-    writer.writerow(["features", "mean plain [s]", "std plain", "mean encryped [s]","std encrypted", "relative error", "sample size"])
+    writer.writerow(["features", "mean plain in s", "std plain", "mean encryped in s","std encrypted", "relative error", "sample size"])
         
     for i in range(len(feature_size)):
         writer.writerow([feature_size[i], round(plain_times[i],5), round(plain_times_std[i],5), round(cipher_times[i],5), 
-                         round(cipher_times_std[i],5), round(mean_error[i],5), sample_sizes[i]-5])
+                         round(cipher_times_std[i],5), round(error_amount[i],5), sample_sizes[i]-5])
         file.flush()
         
     file.close()
