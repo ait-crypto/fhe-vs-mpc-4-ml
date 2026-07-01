@@ -1,6 +1,6 @@
-# FHE vs. MPC for ML
+# FHE vs. MPC for ML WIP
 
-This repository is the collection of code used in the paper .... . It utilizes uv managed python virtual environments and implements all FHE and MPC benchmark codes, as well as artifacts used in our paper.
+This repository is the collection of code used in the paper Comprehensive Benchmarking of Secure Computation Technologies for Machine Learning on General Purpose Hardware. It utilizes uv managed python virtual environments and implements all FHE and MPC benchmark codes, as well as artifacts used in our paper.
 
 
 ## Installation
@@ -37,3 +37,7 @@ Some files may require args to be appended to the execution command. A list of a
 | l2.py | vector size | concrete_benchmarks/l2.py 16 |
 | deploy.py | model parameter amount, layer amount | hybrid_model_benchmarks/deploy.py 1000 3|
 | client.py | model parameter amount, layer amount | hybrid_model_benchmarks/client.py 1000 3|
+| linear_regression.py | quantization bits | model_benchmarks/linear_regression.py 7|
+| linear_trained.py | quantization bits | model_benchmarks/linear_trained.py 3|
+| logistic_classification.py | quantization bits | model_benchmarks/logistic_classification.py 11|
+| mlp_trained.py | quantization bits | model_benchmarks/mlp_trained.py 6|
