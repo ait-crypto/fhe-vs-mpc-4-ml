@@ -83,14 +83,14 @@ def test(sample_size, vectors_size):
 
 if __name__ == "__main__":
 
-    vector_sizes = int(sys.argv[1])
+    vector_size = int(sys.argv[1])
 
     warmup = 3
     file = open("results/distance_measures/l1/data.csv", "a", nwline='')
     writer = csv.writer(file)
     writer.writerow(["vector size", "mean plain [s]", "std plain", "mean encryped [s]","std encrypted", "error", "sample size"])
         
-    for i in vector_sizes:
+    for i in vector_size:
         test(20+warmup, i)
         print(f"done with vector size: {i}")
 

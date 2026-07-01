@@ -103,13 +103,13 @@ def test(sample_size, vectors_size):
 
 if __name__ == "__main__":
 
-    vector_sizes = int(sys.argv[1])
+    vector_size = int(sys.argv[1])
 
     file = open("results/distance_measures/cosine/data.csv", "a", newline='')
     writer = csv.writer(file)
     writer.writerow(["vector size", "mean plain [s]", "std plain", "mean encryped [s]","std encrypted", "error", "sample size"])
 
-    for i in vector_sizes:
+    for i in vector_size:
         test(4+1, i)
         print(f"done with vector size: {i}")
         writer.writerow([i, round(plain_times[-1],4), round(plain_times_std[-1],5), round(cipher_times[-1],4), 

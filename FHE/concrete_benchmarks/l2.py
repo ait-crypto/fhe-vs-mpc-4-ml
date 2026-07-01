@@ -86,14 +86,14 @@ def test(sample_size, vectors_size):
 
 if __name__ == "__main__":
 
-    vector_sizes = int(sys.argv[1])
+    vector_size = int(sys.argv[1])
 
     warmup = 2
     file = open("l2_more_data.csv", "a", newline='')
     writer = csv.writer(file)
     writer.writerow(["vector size", "mean plain in s", "std plain", "mean encryped in s","std encrypted", "error", "sample size"])
     
-    for i in vector_sizes:
+    for i in vector_size:
         test(10+warmup, i)
         print(f"done with vector size: {i}")
         writer.writerow([i, round(plain_times[-1],4), round(plain_times_std[-1],4), round(cipher_times[-1],4), 
