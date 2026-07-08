@@ -155,9 +155,3 @@ pass the file via `--config`. All node addresses default to `127.0.0.1`
    (secure/plaintext time), `rmse`, and — for `benchmark_full_stats.py` — the
    power/memory/bandwidth summaries and per-sample `timeseries`.
 
-## Using this as an evaluation repo
-
-This directory is standalone: copy it into your evaluation/artifact repository
-as-is. It has no dependency on the surrounding project — all model definitions
-and the node launcher are included here, and every script defaults to
-`configs/3pc.json`, so it runs from its own root with no path edits.
