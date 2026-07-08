@@ -1,0 +1,7 @@
+# Pinned to match the environment the paper results were produced with.
+flax==0.8.4
+spu==0.9.3b0
+tqdm>=4.67.1
+psutil>=5.9
+pyrapl>=0.2.3.1
+# jax is installed transitively by spu/flax; no need to pin it here.
