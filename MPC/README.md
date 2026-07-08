@@ -13,15 +13,16 @@ bandwidth**, and the **RMSE** of the secure output against the plaintext output.
 
 ```
 .
-├── benchmark_full_stats.py     # MLP / CNN / LSTM / LinearRegression sweeps + full resource stats
+├── benchmark_full_stats.py     # MLP / CNN / LSTM / Linear+Logistic regression sweeps + full resource stats
 ├── benchmark_classic_cnn.py    # LeNet / AlexNet / TinyCNN
 ├── benchmark_mobilefacenet.py  # MobileFaceNet
+├── benchmark_primitive_ops.py  # matmul + relu / sigmoid / gelu primitives
 ├── run_nodes.py                # brings up the local SPU node cluster
 ├── utils.py                    # small shared helpers (count_parameters)
 ├── configs/
 │   └── 3pc.json                # 3-party ABY3 cluster + device topology
 ├── models/
-│   ├── generic.py              # parametrised MLP / CNN / LSTM / LinearRegression
+│   ├── generic.py              # parametrised MLP / CNN / LSTM / Linear + Logistic regression
 │   ├── tiny_cnn.py             # TinyCNN
 │   └── mobilefacenet.py        # MobileFaceNet
 ├── pyproject.toml              # dependencies (uv)
@@ -87,7 +88,7 @@ Sweeps a parametrised model family and records the full resource profile
 
 | flag | default | meaning |
 | --- | --- | --- |
-| `--model` | – | `mlp` \| `cnn` \| `lstm` \| `lin` |
+| `--model` | – | `mlp` \| `cnn` \| `lstm` \| `lin` \| `log` |
 | `--use-spu` | off | run the secure SPU path (omit for plaintext-only) |
 | `--config` | `configs/3pc.json` | SPU cluster/device config |
 | `--num-epochs-spu` | `1000` | number of secure inference runs |
@@ -113,6 +114,28 @@ Times MobileFaceNet (112×112×3 input) and writes timing JSON.
 
 ```bash
 python benchmark_mobilefacenet.py --out-results mbf.json --num-epochs 10
+```
+
+### `benchmark_primitive_ops.py`
+
+Times individual primitives (secure vs. plaintext) across a few input sizes and
+prints the means/stdevs. Useful for attributing end-to-end model cost to the
+underlying operations.
+
+| flag | default | meaning |
+| --- | --- | --- |
+| `--op` | – | `matmul` \| `relu` \| `sigmoid` \| `gelu` \| `l1` \| `l2` \| `cos` |
+| `--config` | `configs/3pc.json` | SPU cluster/device config |
+| `--num-epochs` | `100` | number of timed runs per input size |
+| `--vec-size` | – | `128` \| `256` \| `512`; **required** for distance ops (`l1`/`l2`/`cos`) |
+
+`l1` / `l2` / `cos` are vector distances between two parties' inputs (L1, L2,
+and cosine distance) at the chosen `--vec-size`.
+
+```bash
+python benchmark_primitive_ops.py --op matmul
+python benchmark_primitive_ops.py --op cos --vec-size 512
+python benchmark_primitive_ops.py --op l2 --vec-size 256
 ```
 
 ## Configuration (`configs/3pc.json`)

@@ -13,7 +13,7 @@ from tqdm import tqdm
 import psutil
 import pyRAPL
 
-from models.generic import CNN, LSTM, MLP, LinearRegression
+from models.generic import CNN, LSTM, MLP, LinearRegression, LogisticRegression
 
 parser = argparse.ArgumentParser(description="Benchmark models.")
 parser.add_argument("--config", default="configs/3pc.json")
@@ -327,6 +327,10 @@ lin_reg_config = {
     "input_size": [(1, 10), (1, 50), (1, 100), (1, 250), (1, 500)]
 }
 
+log_reg_config = {
+    "input_size": [(1, 10), (1, 50), (1, 100), (1, 250), (1, 500)]
+}
+
 
 def main():
     full_stats = []
@@ -347,6 +351,10 @@ def main():
             lin_reg_flag = True
             m_c = lin_reg_config
             model = LinearRegression
+        case "log":
+            lin_reg_flag = True
+            m_c = log_reg_config
+            model = LogisticRegression
         case _:
             raise NotImplementedError
 

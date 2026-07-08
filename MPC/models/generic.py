@@ -12,6 +12,14 @@ class LinearRegression(nn.Module):
         return x
 
 
+class LogisticRegression(nn.Module):
+    @nn.compact
+    def __call__(self, x):
+        x = nn.Dense(1)(x)
+        x = nn.sigmoid(x)
+        return x
+
+
 class MLP(nn.Module):
     features: list[int]
 
