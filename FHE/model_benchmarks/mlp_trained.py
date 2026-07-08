@@ -129,7 +129,7 @@ if __name__ == "__main__":
     samples = 50
     for i in layers:
         test(i, epochs, samples, bits)
-        print(f"done with number of feature: {i}")
+        print(f"done with number of layers: {i}")
     print("done with time and accuracy benchmarks benchmarks")
     
     file = open(f'results/mlp/trained/{bits}bit/data.csv','a', newline='')
