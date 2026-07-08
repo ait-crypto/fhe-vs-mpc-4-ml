@@ -153,7 +153,7 @@ if __name__ == "__main__":
     print("done with time and accuracy benchmarks benchmarks")
 
         
-    file = open(f'results/linear_regression/{bits}bit/data.csv','a', newline='')
+    file = open(f'results/linear_regression/normal/{bits}bit/data.csv','a', newline='')
     writer = csv.writer(file)
     writer.writerow(["features", "mean plain [s]", "std plain", "mean encryped [s]","std encrypted", "relative error", "sample size"])
         
