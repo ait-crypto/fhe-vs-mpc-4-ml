@@ -113,7 +113,7 @@ def base_power_measurement(bits):
     cmd = ["sudo", "powerstat", "-R", "1", "60"]
 
     print("Running base powerstat...")
-    with open(f"results/linear_regression/{bits}bit/idle_powerstat.txt", "w") as f:
+    with open(f"results/linear_regression/normal/{bits}bit/idle_powerstat.txt", "w") as f:
         subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT)
     print("Done. Output saved.")
 
@@ -134,7 +134,7 @@ if __name__ == "__main__":
     ############## power stuff
     base_power_measurement(bits)
 
-    mem_file_plain = open(f"results/linear_regression/{bits}bit/powerstat_bench_plain.txt", "w")
+    mem_file_plain = open(f"results/linear_regression/normal/{bits}bit/powerstat_bench_plain.txt", "w")
     proc = bench_power_measurement(mem_file_plain)  
     plain_bench(2000000, 500, bits)
     print("done with plaintext powerstat benchmark")
