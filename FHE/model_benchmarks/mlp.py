@@ -137,7 +137,6 @@ def model_inference(model, fhe_model, sample_size):
                 ptimes.append(perf_counter()-begin)
         x += 1
 
-    print(np.mean(errors))
     avgC = np.mean(ctimes)
     std_devC = np.std(ctimes)
     avgP = np.mean(ptimes)

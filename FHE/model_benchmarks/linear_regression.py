@@ -75,7 +75,6 @@ def test(features, sample_size, mem_file, bits):
         x += 1
     
     proc.terminate()
-    #print("errors: ", np.mean(errors))
     
     avgC = np.mean(ctimes)
     std_devC = np.std(ctimes)
@@ -86,7 +85,6 @@ def test(features, sample_size, mem_file, bits):
     print(std_devP, ", ", avgP)
     if (std_devC*10 > avgC): return test(features, sample_size*2, mem_file, bits)
     else:
-        print("another one")
         plain_times.append(avgP)
         cipher_times.append(avgC)
         plain_times_std.append(std_devP)
@@ -147,7 +145,7 @@ if __name__ == "__main__":
 
     for i in feature_size:
         test(i,3000+5, mem_file, bits)
-        print(f"done with number of feature: {i}")
+        print(f"done with number of features: {i}")
     
     mem_file.close()
     print("done with time and accuracy benchmarks benchmarks")

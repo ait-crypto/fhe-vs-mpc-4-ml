@@ -145,7 +145,7 @@ if __name__ == "__main__":
 
     for i in feature_size:
         test(i,3000+5, mem_file, bits)
-        print(f"done with number of feature: {i}")
+        print(f"done with number of features: {i}")
     mem_file.close()
     print("done with time and accuracy benchmarks benchmarks")
 
