@@ -72,13 +72,12 @@ def test(sample_size, vectors_size):
 
     if np.std(times_enc)*10 > np.mean(times_enc): test(sample_size*2, vectors_size)  
     else: 
-        print("another one")
         plain_times.append(np.mean(times_plain))
         cipher_times.append(np.mean(times_enc))
         plain_times_std.append(np.std(times_plain))
         cipher_times_std.append(np.std(times_enc))
         mean_error.append(np.mean(errors))
-        sample_sizes.append(sample_size)      
+        sample_sizes.append(sample_size) 
 
 
 if __name__ == "__main__":
@@ -86,17 +85,17 @@ if __name__ == "__main__":
     vector_size = int(sys.argv[1])
 
     warmup = 3
-    file = open("results/distance_measures/l1/data.csv", "a", nwline='')
+    file = open("results/distance_measures/l1/data.csv", "a", newline='')
     writer = csv.writer(file)
     writer.writerow(["vector size", "mean plain [s]", "std plain", "mean encryped [s]","std encrypted", "error", "sample size"])
         
-    for i in vector_size:
-        test(20+warmup, i)
-        print(f"done with vector size: {i}")
+    
+    test(20+warmup, vector_size)
+    print(f"done with vector size: {vector_size}")
 
-        writer.writerow([i, round(plain_times[-1],4), round(plain_times_std[-1],4), round(cipher_times[-1],4), 
-                             round(cipher_times_std[-1],4), round(mean_error[-1],4), sample_sizes[-1]-1]-warmup)   
-        file.flush()
+    writer.writerow([vector_size, round(plain_times[-1],4), round(plain_times_std[-1],4), round(cipher_times[-1],4), 
+                             round(cipher_times_std[-1],4), round(mean_error[-1],4), sample_sizes[-1]-warmup])   
+    file.flush()
 
     file.close()
 

@@ -61,7 +61,6 @@ def test(sample_size, vectors_size):
         end_enc = perf_counter()-begin
         res_dec = circuit.decrypt(res_enc)
 
-        print("done one: ", end_enc)
         if counter >= 1: 
             times_plain.append(end_plain)
             for j in range(100): ### just to have more plaintext measurements
@@ -73,10 +72,8 @@ def test(sample_size, vectors_size):
             errors.append(np.abs(res_plain-res_dec))
 
         counter += 1
-    print(np.mean(times_enc))
     if np.std(times_enc)*10 > np.mean(times_enc): test(sample_size*2, vectors_size)  
     else: 
-        print("another one")
         plain_times.append(np.mean(times_plain))
         cipher_times.append(np.mean(times_enc))
         plain_times_std.append(np.std(times_plain))
@@ -89,16 +86,15 @@ if __name__ == "__main__":
     vector_size = int(sys.argv[1])
 
     warmup = 2
-    file = open("l2_more_data.csv", "a", newline='')
+    file = open("results/distance_measures/l2/data.csv", "a", newline='')
     writer = csv.writer(file)
     writer.writerow(["vector size", "mean plain in s", "std plain", "mean encryped in s","std encrypted", "error", "sample size"])
     
-    for i in vector_size:
-        test(10+warmup, i)
-        print(f"done with vector size: {i}")
-        writer.writerow([i, round(plain_times[-1],4), round(plain_times_std[-1],4), round(cipher_times[-1],4), 
-                             round(cipher_times_std[-1],4), round(mean_error[-1],4), sample_sizes[-1]-1])   
-        file.flush()
+    test(10+warmup, vector_size)
+    print(f"done with vector size: {vector_size}")
+    writer.writerow([vector_size, round(plain_times[-1],4), round(plain_times_std[-1],4), round(cipher_times[-1],4), 
+                             round(cipher_times_std[-1],4), round(mean_error[-1],4), sample_sizes[-1]-warmup])   
+    file.flush()
     file.close()
 
 

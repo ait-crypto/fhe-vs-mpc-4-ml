@@ -109,14 +109,13 @@ if __name__ == "__main__":
     writer = csv.writer(file)
     writer.writerow(["vector size", "mean plain [s]", "std plain", "mean encryped [s]","std encrypted", "error", "sample size"])
 
-    for i in vector_size:
-        test(4+1, i)
-        print(f"done with vector size: {i}")
-        writer.writerow([i, round(plain_times[-1],4), round(plain_times_std[-1],5), round(cipher_times[-1],4), 
-                             round(cipher_times_std[-1],4), round(mean_error[-1],4), sample_sizes[-1]-1]-1)   
+    warmup = 1
+    test(5+warmup, vector_size)
+    print(f"done with vector size: {vector_size}")
+    writer.writerow([vector_size, round(plain_times[-1],4), round(plain_times_std[-1],5), round(cipher_times[-1],4), 
+                             round(cipher_times_std[-1],4), round(mean_error[-1],4), sample_sizes[-1]-warmup])   
         
-        file.flush()
-    
+    file.flush()
     file.close()
 
 
