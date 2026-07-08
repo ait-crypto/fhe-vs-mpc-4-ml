@@ -11,7 +11,7 @@ from concrete.ml.torch.compile import compile_brevitas_qat_model
 from torch import nn
 
 
-N_BITS = 7
+N_BITS = 6
 
 plain_times = []
 plain_times_std = []
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     for i in parameter_values:
         mem_file = open(f"results/mlp/basic/powerstat_bench_{i}p.txt", "w")
         for j in layer_values:
-            test(j,i,50+2, mem_file)
+            test(j,i,5, mem_file)
             print(f"done with parameters: {i} and layers: {j}")
 
 
