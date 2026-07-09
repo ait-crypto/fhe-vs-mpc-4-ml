@@ -2,9 +2,7 @@
 from time import perf_counter
 import csv
 import subprocess
-import gc
 import sys
-import time
 
 import numpy as np
 from sklearn.datasets import make_regression

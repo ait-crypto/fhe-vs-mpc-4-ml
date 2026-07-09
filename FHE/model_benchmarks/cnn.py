@@ -112,7 +112,6 @@ def inference(model, fhe_model, sample_size, picture_size):
 
     if (std_devC*10 > avgC): return inference(model, fhe_model, int(sample_size*1.5), picture_size)
     else:
-        print("another one")
         plain_times.append(avgP)
         cipher_times.append(avgC)
         plain_times_std.append(std_devP)
@@ -173,7 +172,7 @@ if __name__ == "__main__":
     writer.writerow(["parameters", "picture size", "mean plain in s", "std plain", "mean encryped in s","std encrypted", "error", "sample size"])
                 
     for i in sizes:
-        mem_file = open(f"results/mlp/basic/powerstat_bench_{i}pixel.txt", "w")
+        mem_file = open(f"results/cnn/powerstat_bench_{i}pixel.txt", "w")
         for j in parameters:
             test(10+1, i ,j, 3, mem_file)
             writer.writerow([parameter_amounts[-1], picture_sizes[-1], round(plain_times[-1],4), round(plain_times_std[-1],4), round(cipher_times[-1],4), 
